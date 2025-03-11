@@ -14,28 +14,28 @@ from numpy import pi
 
 # =======================================================================================================================
 
-def traccia_linea_generica():
+def straight_line():
     # definizione punti
-    punto_partenza = (1,1)
-    punto_arrivo = (2,3)
+    start_point = (1,1)
+    end_point = (2,3)
 
-    n_punti = 1000
+    n_points = 1000
 
     um1 = ("Tempo", "Spazio", "Velocità", "Accelerazione")    
-    LDM = MotionProfile()
-    PlotLDM = PlotMotionProfile(um_axes=um1)
-    TracciaPercorso = TracePath()
+    MP = MotionProfile()
+    PlotMP = PlotMotionProfile(um_axes=um1)
+    TrPath = TracePath()
 
     # discretizzo il percorso
-    pos_x, pos_y = TracciaPercorso.trace_line(punto_partenza, punto_arrivo, n_points=n_punti)
+    pos_x, pos_y = TrPath.trace_line(start_point, end_point, n_points=n_points)
     
     # mostro il percorso
     um = ("[m]", "[m]")
-    PlotLDM.plot_path(x=pos_x, y=pos_y, um=um)
+    PlotMP.plot_path(x=pos_x, y=pos_y, um=um)
 
     # calcolo la legge di moto e mostro i grafici
-    Ds_x = punto_arrivo[0] - punto_partenza[0]
-    Ds_y = punto_arrivo[1] - punto_partenza[1]
+    Ds_x = end_point[0] - start_point[0]
+    Ds_y = end_point[1] - start_point[1]
     Ds = (Ds_x**2 + Ds_y**2)**(1/2)
     Dt = 1
     t_i = 0
@@ -43,120 +43,129 @@ def traccia_linea_generica():
     shape = [0.2, 0.6, 0.2]
 
     # spostamento in modulo
-    t, s, v, a  = LDM.trapezoidal_MP(Ds=Ds, Dt=Dt, ti=t_i, s0=s0, n_points=n_punti, shape=shape)
+    t, s, v, a  = MP.trapezoidal_MP(Ds=Ds, Dt=Dt, ti=t_i, s0=s0, n_points=n_points, shape=shape)
 
     um_x = ("[s]", "[m]", "$[\\frac{m}{s}]$", "$[\\frac{m}{s^{2}}]$")
-    titoli_x = ["          Moto", "Spazio", "Velocità", "Accelerazione"] 
-    PlotLDM.plot_motion_profile(title=titoli_x, t=t, s=s, v=v, a=a, amax=(10,-10), vmax=(2,1), um=um_x)
+    title_x = ["          Moto", "Spazio", "Velocità", "Accelerazione"] 
+    PlotMP.plot_motion_profile(title=title_x, t=t, s=s, v=v, a=a, amax=(10,-10), vmax=(2,1), um=um_x)
 
     # spostamento, velocità ed accelerazione in x e y
-    angle = LDM.get_line_angle(P0=punto_partenza, P1=punto_arrivo)
-    sx, sy = LDM.get_line_position(s=s, angle=angle)
-    vx, vy = LDM.get_line_speed(v=v, angle=angle)
-    ax, ay = LDM.get_line_acceleration(a=a, angle=angle)
+    angle = MP.get_line_angle(P0=start_point, P1=end_point)
+    sx, sy = MP.get_line_position(s=s, angle=angle)
+    vx, vy = MP.get_line_speed(v=v, angle=angle)
+    ax, ay = MP.get_line_acceleration(a=a, angle=angle)
 
     um_x = ("[s]", "[m]", "$[\\frac{m}{s}]$", "$[\\frac{m}{s^{2}}]$")
-    titoli_x = ["          Moto in x", "Spazio in x", "Velocità in x", "Accelerazione in x"] 
-    PlotLDM.plot_motion_profile(title=titoli_x, t=t, s=sx, v=vx, a=ax, amax=(0,0), vmax=(0,0), um=um_x)
+    title_x = ["          Moto in x", "Spazio in x", "Velocità in x", "Accelerazione in x"] 
+    PlotMP.plot_motion_profile(title=title_x, t=t, s=sx, v=vx, a=ax, amax=(0,0), vmax=(0,0), um=um_x)
     
     um_y = ("[s]", "[m]", "$[\\frac{m}{s}]$", "$[\\frac{m}{s^{2}}]$")
-    titoli_y = ["          Moto in y", "Spazio in y", "Velocità in y", "Accelerazione in y"] 
-    PlotLDM.plot_motion_profile(title=titoli_y, t=t, s=sy, v=vy, a=ay, amax=(0,0), vmax=(0,0), um=um_y)
+    title_y = ["          Moto in y", "Spazio in y", "Velocità in y", "Accelerazione in y"] 
+    PlotMP.plot_motion_profile(title=title_y, t=t, s=sy, v=vy, a=ay, amax=(0,0), vmax=(0,0), um=um_y)
 
     
 
 
 # =======================================================================================================================
 
-def traccia_arco():
+def circle_arc():
     # parametri della curva
     R = 1
-    centro = (0, 0)
-    angolo_partenza = 0
-    angolo = pi/2
+    center = (0, 0)
+    starting_angle = 0
+    angle = pi/2
     
-    n_punti = 1000
+    n_points = 1000
 
     um1 = ("Tempo", "Spazio", "Velocità", "Accelerazione")    
-    LDM = MotionProfile()
-    PlotLDM = PlotMotionProfile(um_axes=um1)
-    TracciaPercorso = TracePath()
+    MP = MotionProfile()
+    PlotMP = PlotMotionProfile(um_axes=um1)
+    TrPath = TracePath()
 
     # discretizzo il percorso
-    pos_x, pos_y = TracciaPercorso.trace_arc(radius=R, center=centro, start_angle=angolo_partenza, angle=angolo, n_points=n_punti)
+    pos_x, pos_y = TrPath.trace_arc(radius=R, center=center, start_angle=starting_angle, angle=angle, n_points=n_points)
     
     # mostro il percorso
     um = ("[m]", "[m]")
-    #PlotLDM.plot_path(x=pos_x, y=pos_y, um=um)
+    PlotMP.plot_path(x=pos_x, y=pos_y, um=um)
 
     # calcolo la legge di moto
     Dt = 1
     ti = 0
     shape = [0.2, 0.6, 0.2]
-    s0 = angolo_partenza*R
-    Ds = angolo*R
-    par_cinematici = list(LDM.trapezoidal_MP(Ds=Ds, Dt=Dt, ti=ti, s0=s0, n_points=n_punti, shape=shape))
-    t, s, v, a, at, ac = LDM.arc_motion(par_cinematici, radius=R, start_angle=angolo_partenza)
+    s0 = starting_angle*R
+    Ds = angle*R
+    kin_param = list(MP.trapezoidal_MP(Ds=Ds, Dt=Dt, ti=ti, s0=s0, n_points=n_points, shape=shape))
+    t, s, v, a, at, ac = MP.arc_motion(kin_param, radius=R, start_angle=starting_angle)
 
     um1 = ["[s]", "[m]", "$[\\frac{m}{s}]$", "$[\\frac{m}{s^{2}}]$"]
-    titoli = ["          Moto curvilineo", "Spazio", "Velocità", "Accelerazione totale"]
-    PlotLDM.plot_motion_profile(title=titoli, t=t, s=s, v=v, a=a, um=um1)
+    title = ["          Moto curvilineo", "Spazio", "Velocità", "Accelerazione totale"]
+    PlotMP.plot_motion_profile(title=title, t=t, s=s, v=v, a=a, um=um1)
 
     # spostamento, velocità ed accelerazione in x e y
-    sx, sy = LDM.get_arc_position()
-    vx, vy = LDM.get_arc_speed()
-    atx, aty = LDM.get_arc_tan_acceleration()
-    acx, acy = LDM.get_arc_centr_acceleration()
-    ax, ay = LDM.get_arc_total_acceleration()
+    sx, sy = MP.get_arc_position()
+    vx, vy = MP.get_arc_speed()
+    atx, aty = MP.get_arc_tan_acceleration()
+    acx, acy = MP.get_arc_centr_acceleration()
+    ax, ay = MP.get_arc_total_acceleration()
 
-    """PlotMotionProfile.plot_kinematic_value(title="Accelerazione centripeta", t=t, x=ac, um=["s","$[\\frac{m}{s^{2}}]$"], 
-                                 label=["tempo", "Accelerazione centripeta"], color="RED")
+    # mostro l'accelerazione centripeta
+    PlotMP.plot_kinematic_value(title="Accelerazione centripeta", t=t, x=ac, um=["s","$[\\frac{m}{s^{2}}]$"], 
+                                label=["tempo", "Accelerazione centripeta"], color="RED")
     
-    PlotMotionProfile.plot_kinematic_value(title="Accelerazione tangenziale", t=t, x=at, um=["s","$[\\frac{m}{s^{2}}]$"], 
-                                 label=["tempo", "Accelerazione tangenziale"], color="RED")"""
+    # mostro l'accelerazione tangenziale
+    PlotMP.plot_kinematic_value(title="Accelerazione tangenziale", t=t, x=at, um=["s","$[\\frac{m}{s^{2}}]$"], 
+                                label=["tempo", "Accelerazione tangenziale"], color="RED")
 
-    """um_y = ("[s]", "[m]", "$[\\frac{m}{s}]$", "$[\\frac{m}{s^{2}}]$")
-    titoli_y = ["          Moto in y", "Spazio in y", "Velocità in y", "Accelerazione in y"] 
-    PlotMotionProfile.plot_motion_profile(title=titoli_y, t=t, s=sy, v=vy, a=ay, amax=(0,0), vmax=(0,0), um=um_y)"""
-
-    """PlotMotionProfile.plot_kinematic_value(title="Accelerazione totale", t=t, x=a, um=["s","$[\\frac{m}{s^{2}}]$"], 
-                                 label=["tempo", "Accelerazione totale"], color="RED")"""
+    # mostro l'accelerazione totale
+    PlotMP.plot_kinematic_value(title="Accelerazione totale", t=t, x=a, um=["s","$[\\frac{m}{s^{2}}]$"], 
+                                label=["tempo", "Accelerazione totale"], color="RED")
+    
+    # cinematica proiettata sull'asse x e y
+    um_x = ("[s]", "[m]", "$[\\frac{m}{s}]$", "$[\\frac{m}{s^{2}}]$")
+    title_x = ["          Moto in x", "Spazio in x", "Velocità in x", "Accelerazione totale in x"] 
+    PlotMP.plot_motion_profile(title=title_x, t=t, s=sx, v=vx, a=ax, amax=(0,0), vmax=(0,0), um=um_x)
     
     um_y = ("[s]", "[m]", "$[\\frac{m}{s}]$", "$[\\frac{m}{s^{2}}]$")
-    titoli_y = ["          Moto in y", "Spazio in y", "Velocità in y", "Accelerazione totale in y"] 
-    PlotMotionProfile.plot_motion_profile(title=titoli_y, t=t, s=sy, v=vy, a=ay, amax=(0,0), vmax=(0,0), um=um_y)
+    title_y = ["          Moto in y", "Spazio in y", "Velocità in y", "Accelerazione in y"] 
+    PlotMP.plot_motion_profile(title=title_y, t=t, s=sy, v=vy, a=ay, amax=(0,0), vmax=(0,0), um=um_y)
 
-    um_x = ("[s]", "[m]", "$[\\frac{m}{s}]$", "$[\\frac{m}{s^{2}}]$")
-    titoli_y = ["          Moto in x", "Spazio in x", "Velocità in x", "Accelerazione totale in x"] 
-    PlotMotionProfile.plot_motion_profile(title=titoli_y, t=t, s=sx, v=vx, a=ax, amax=(0,0), vmax=(0,0), um=um_x)
+    
 
 
 # =======================================================================================================================
 
-def traccia_percorso():
+def closed_loop():
     # prove legge di moto
     um1 = ("Tempo", "Spazio", "Velocità", "Accelerazione")    
-    LDM = MotionProfile()
-    PlotLDM = PlotMotionProfile(um_axes=um1)
-    TracciaPercorso = TracePath()
+    MP = MotionProfile()
+    PlotMP = PlotMotionProfile(um_axes=um1)
+    TrPath = TracePath()
 
-    n_punti = 1000
+    n_points = 1000
 
     # geometrie del percorso
     h = 1
     w = 2
     R = 0.4
 
-    pos_x, pos_y = TracciaPercorso.trace_rounded_rectangle(center=(0,0), rectangle_angle=0, fillet_radius=R, heigth=h, width=w, n_points=n_punti)
+    pos_x, pos_y = TrPath.trace_rounded_rectangle(center=(0,0), rectangle_angle=0, fillet_radius=R, heigth=h, width=w, n_points=n_points)
 
     # mostro il percorso
     um2 = ("[m]", "[m]")
-    PlotMotionProfile.plot_path(x=pos_x, y=pos_y, um=um2)
+    #PlotMP.plot_path(x=pos_x, y=pos_y, um=um2)
 
     # -------------------------------------------------------------------------------------------------------
     # calcolo la legge di moto
+    
+    shape_acc = [0.2, 0.8, 0] 
+    shape_cost = [0, 1, 0]     
+    shape_dec = [0, 0.8, 0.2]
+    shapes = [shape_acc, shape_cost, shape_cost, shape_cost, shape_cost, shape_cost, shape_cost, shape_dec]
+    t, s, v, a = MP.rounded_rectangle_motion(shapes=shapes, fillet_radius=R)
 
-    # inizializzo le grandezze cinematiche
+
+    """#inizializzo le grandezze cinematiche
     t = np.array([])
     s = np.array([])
     v = np.array([])
@@ -185,11 +194,11 @@ def traccia_percorso():
         
         Dt = Ds/(v_max*(forma[0]/2 + forma[1] + forma[2]/2))
 
-        ti, si, vi, ai = LDM.trapezoidal_MP(Ds=Ds, Dt=Dt, ti=t0, s0=s0, n_points=n_punti, shape=forma)
+        ti, si, vi, ai = MP.trapezoidal_MP(Ds=Ds, Dt=Dt, ti=t0, s0=s0, n_points=n_points, shape=forma)
         
         if i % 2 == 1:
             par_cinematici = ti, si, vi, ai
-            ti, si, vi, ai, ait, aic = LDM.arc_motion(par_cinematici, radius=R, start_angle=0)
+            ti, si, vi, ai, ait, aic = MP.arc_motion(par_cinematici, radius=R, start_angle=0)
 
         s0 = si[-1]
         t0 = ti[-1]
@@ -197,12 +206,12 @@ def traccia_percorso():
         t = np.concatenate([t, ti])
         s = np.concatenate([s, si])
         v = np.concatenate([v, vi])
-        a = np.concatenate([a, ai])
+        a = np.concatenate([a, ai])"""
 
     # traccio la legge di moto complessiva
     um1 = ["[s]", "[m]", "$[\\frac{m}{s}]$", "$[\\frac{m}{s^{2}}]$"]
-    titoli = ["          Moto rettilineo", "Spazio percorso", "Velocità percorso", "Accelerazione percorso"]
-    PlotMotionProfile.plot_motion_profile(title=titoli, t=t, s=s, v=v, a=a, um=um1)
+    titoli = ["          Moto rettilineo", "Spazio percorso", "Velocità percorso", "Accelerazione totale"]
+    PlotMP.plot_motion_profile(title=titoli, t=t, s=s, v=v, a=a, um=um1)
 
 # =======================================================================================================================
 
@@ -246,14 +255,14 @@ def traccia_poligono():
 
 
 if __name__ == "__main__":
-    scelta = 0
+    scelta = 2
     
     if scelta == 0:
-        traccia_linea_generica()
+        straight_line()
     elif scelta == 1:
-        traccia_arco()
+        circle_arc()
     elif scelta == 2:
-        traccia_percorso()
+        closed_loop()
     elif scelta == 3:
         traccia_percorso_utensile()
     elif scelta == 4:
