@@ -267,7 +267,6 @@ class MotionProfile():
 
             a = np.append(a, (at[-1]**2 + ac[-1]**2)**(1/2)) #  total acceleration
 
-
             # update x any kinematic components
             self.arc_sx = np.append(self.arc_sx, self.arc_sx[-1] - dx)
             self.arc_sy = np.append(self.arc_sy, self.arc_sy[-1] + dy)
@@ -388,70 +387,5 @@ class MotionProfile():
         return ax, ay
     
 #=========================================================================================================================
-    # ******************** creare procedura per ottenere la legge di moto da un percorso generico ***********
-    def rounded_rectangle_motion(self, shapes=[], rectangle_angle=0, fillet_radius=1, heigth=2, width=1, Dt=1, n_points=1000) -> tuple:
-        """
-        Calculate a law of motion for a polygon that has straight and curved parts alternated 
-        with same amount of points.
+    
         
-        :param 
-               fillet_radius: radius of the arc
-               Dt: total time required to complete the loop
-               
-        :return: 
-        """
-        # initialisation
-        R = fillet_radius
-        w = width
-        h = heigth
-        r_angle = rectangle_angle
-        n_parts = 8                 # number of the parts of the rectangle loop
-        t0 = 0
-        s0 = 0
-        t = np.array([])
-        s = np.array([])
-        v = np.array([])
-        a = np.array([])
-        v_max = 1
-        
-        # check the correct number of shapes parameter
-        if len(shapes) < n_parts:
-            print("Not all the parts of the loop kinematic are defined!")
-            # fill where some part is missing
-            for i in range(n_parts-len(shapes)):
-                shapes.append([0, 1, 0])
-
-        # controll of the radius
-        if R < 0 or R > w/2 or R > h/2:
-            print("Radius must be greater than 0 but smaller than half legth or half width.")
-            R = 0
-
-        # ********** sistemare discorrso angolo **************
-        wp = w - 2*R       # width without fillet
-        hp = h - 2*R       # height without fillet
-        arc_len = R*pi/2   # lenght of each fillet
-
-        list_path = (wp, arc_len, hp, arc_len, wp, arc_len, hp, arc_len) # list of the rectangle parts (straight lines and fillets)
-
-        for i, j in zip(list_path, shapes):
-            Dt = i/(v_max*(j[0]/2 + j[1] + j[2]/2))
-
-            ti, si, vi, ai = self.trapezoidal_MP(Ds=i, s0=s0, Dt=Dt, ti=t0, n_points=n_points, shape=j) 
-
-            if i % 2 == 1:
-                kin_param = ti, si, vi, ai
-                ti, si, vi, ai, ait, aic = self.arc_motion(kin_param, radius=R, start_angle=0)
-            
-            s0 = si[-1]
-            t0 = ti[-1]
-
-            t = np.concatenate([t, ti])
-            s = np.concatenate([s, si])
-            v = np.concatenate([v, vi])
-            a = np.concatenate([a, ai])
-        
-        return t, s, v, a
-            
-            
-
-    #****************** per i poligoni con raccordo fare procedura a parte *************

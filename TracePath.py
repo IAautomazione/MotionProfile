@@ -85,7 +85,7 @@ class TracePath():
 
         :param center: a tuple of the rectangle center
                rectangle_angle: inclination agle of the rectangle
-               radius: radius of the rounded corners
+               fillet_radius: radius of the rounded corners
                length: length of the rectangle
                width: width of the rectangle
                n_points: number of points for calculation
@@ -143,6 +143,31 @@ class TracePath():
             P_start = (x[-1], y[-1])
         
         return x, y
+    
+    #------------------------------------------------------------------------------------------------------------------------
+
+    def get_rounded_rectangle_perimeter(self, fillet_radius=1, heigth=2, width=1) -> float:
+        """
+        Get a list of lenght of each part of the rounded rectangle
+
+        :param fillet_radius: radius of the rounded corners
+               length: length of the rectangle
+               width: width of the rectangle
+               
+        :return an arrays of 8 values 
+        """
+        # initialisation
+        R = fillet_radius
+        w = width
+        h = heigth
+
+        wp = w - 2*R       # width without fillet
+        hp = h - 2*R       # height without fillet
+        arc_len = R*pi/2   # lenght of each fillet
+
+        list_path = (wp, arc_len, hp, arc_len, wp, arc_len, hp, arc_len) # list of the rectangle parts (straight lines and fillets)
+
+        return list_path
     
 #=========================================================================================================================
 
@@ -211,7 +236,43 @@ class TracePath():
 
         return x, y
     
-    #=========================================================================================================================
+    #------------------------------------------------------------------------------------------------------------------------
+
+    def get_milling_path_perimeter(self, n_step=1, heigth=2, width=1) -> float:
+        """
+        Get a list of lenght of each part of the rounded milling path
+
+        :param length: length of the rectangle
+               width: width of the rectangle
+               n_points: number of points for calculation
+               
+        :return an arrays of 2*n_step+1 values 
+        """
+        # initialisation
+        w = width
+        h = heigth
+        list_path = []
+
+        # controll of n_step value
+        if n_step<1:
+            print("Step must be greater 1 or at least 1!")
+            n_step = 1
+        if not isinstance(n_step, int):
+            print("n_step must be an integer!")
+            n_step = int(np.round(n_step, 0))
+
+        R = h/(2*n_step)
+        s_line = w - R
+
+        for i in range(2*n_step+1):
+            if i%2 == 0:
+                list_path.append(s_line)
+            else:
+                list_path.append(R*pi/2)
+
+        return list_path
+    
+#=========================================================================================================================
 
     def trace_regular_rounded_polygon(self, center=(0, 0), polygon_angle=0, radius=1, n_sides=3, fillet_radius=0.4, n_points=100) -> tuple:
         """

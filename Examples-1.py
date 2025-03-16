@@ -153,52 +153,35 @@ def closed_loop():
 
     # mostro il percorso
     um2 = ("[m]", "[m]")
-    #PlotMP.plot_path(x=pos_x, y=pos_y, um=um2)
-
-    # -------------------------------------------------------------------------------------------------------
-    # calcolo la legge di moto
-    
-    shape_acc = [0.2, 0.8, 0] 
-    shape_cost = [0, 1, 0]     
-    shape_dec = [0, 0.8, 0.2]
-    shapes = [shape_acc, shape_cost, shape_cost, shape_cost, shape_cost, shape_cost, shape_cost, shape_dec]
-    t, s, v, a = MP.rounded_rectangle_motion(shapes=shapes, fillet_radius=R)
-
-
-    """#inizializzo le grandezze cinematiche
+    PlotMP.plot_path(x=pos_x, y=pos_y, um=um2)
+ 
+    # creo la cinematica
     t = np.array([])
     s = np.array([])
     v = np.array([])
     a = np.array([])
 
-    # tracciatura circuito come ciclo for
-    angolo_curve = pi/2
-    segmenti = (w, angolo_curve*R, h, angolo_curve*R, w, angolo_curve*R, h, angolo_curve*R)
-    forma_acc = [0.2, 0.8, 0] 
-    forma_cost = [0, 1, 0]     
-    forma_dec = [0, 0.8, 0.2] 
-    v_max = 1
-    
-
-    # inizializzazione
     t0 = 0
     s0 = 0
-    
-    for i, Ds in enumerate(segmenti):
-        if i == 0:
-            forma = forma_acc
-        elif 0 < i < len(segmenti) - 1:
-            forma = forma_cost
-        elif i == len(segmenti) - 1:
-            forma = forma_dec
-        
-        Dt = Ds/(v_max*(forma[0]/2 + forma[1] + forma[2]/2))
 
-        ti, si, vi, ai = MP.trapezoidal_MP(Ds=Ds, Dt=Dt, ti=t0, s0=s0, n_points=n_points, shape=forma)
+    v_max = 1
+
+    shape_acc = [0.2, 0.8, 0] 
+    shape_cost = [0, 1, 0]     
+    shape_dec = [0, 0.8, 0.2]
+    shapes = [x for x in [shape_acc] + [shape_cost] * 6 + [shape_dec]]
+    
+    p_len = TrPath.get_rounded_rectangle_perimeter(fillet_radius=R, heigth=h, width=w)
+
+    for i, (Ds, shape) in enumerate(zip(p_len, shapes)):       
+        Dt = Ds/(v_max*(shape[0]/2 + shape[1] + shape[2]/2))
+
+        # applico la LDM trapezoidale distinguendo tratti dritti e curvi
+        ti, si, vi, ai = MP.trapezoidal_MP(Ds=Ds, Dt=Dt, ti=t0, s0=s0, n_points=n_points, shape=shape)
         
         if i % 2 == 1:
-            par_cinematici = ti, si, vi, ai
-            ti, si, vi, ai, ait, aic = MP.arc_motion(par_cinematici, radius=R, start_angle=0)
+            kin_param = ti, si, vi, ai
+            ti, si, vi, ai, ait, aic = MP.arc_motion(kin_param, radius=R, start_angle=0)
 
         s0 = si[-1]
         t0 = ti[-1]
@@ -206,47 +189,92 @@ def closed_loop():
         t = np.concatenate([t, ti])
         s = np.concatenate([s, si])
         v = np.concatenate([v, vi])
-        a = np.concatenate([a, ai])"""
-
+        a = np.concatenate([a, ai])
+    
     # traccio la legge di moto complessiva
     um1 = ["[s]", "[m]", "$[\\frac{m}{s}]$", "$[\\frac{m}{s^{2}}]$"]
-    titoli = ["          Moto rettilineo", "Spazio percorso", "Velocità percorso", "Accelerazione totale"]
-    PlotMP.plot_motion_profile(title=titoli, t=t, s=s, v=v, a=a, um=um1)
+    title = ["          Moto rettilineo", "Spazio percorso", "Velocità percorso", "Accelerazione totale"]
+    PlotMP.plot_motion_profile(title=title, t=t, s=s, v=v, a=a, um=um1)
 
 # =======================================================================================================================
 
-def traccia_percorso_utensile():
+def tool_path():
     # prove legge di moto
     um1 = ("Tempo", "Spazio", "Velocità", "Accelerazione")    
-    LDM = MotionProfile()
-    PlotLDM = PlotMotionProfile(um_axes=um1)
-    TracciaPercorso = TracePath()
+    MP = MotionProfile()
+    PlotMP = PlotMotionProfile(um_axes=um1)
+    TrPath = TracePath()
 
-    n_punti = 1000
+    n_points = 1000
 
     # geometrie del percorso
     w = 10
     h = 20
+    n_step = 10
 
-    pos_x, pos_y = TracciaPercorso.trace_milling_path(P_start=(0,0), n_step=10, height=h, width=w, n_points=n_punti)
+    pos_x, pos_y = TrPath.trace_milling_path(P_start=(0,0), n_step=n_step, height=h, width=w, n_points=n_points)
 
     # mostro il percorso
     um2 = ("[m]", "[m]")
-    PlotLDM.plot_path(x=pos_x, y=pos_y, um=um2)
+    PlotMP.plot_path(x=pos_x, y=pos_y, um=um2)
+
+    # creo la cinematica
+    t = np.array([])
+    s = np.array([])
+    v = np.array([])
+    a = np.array([])
+
+    t0 = 0
+    s0 = 0
+
+    v_max = 1
+
+    shape_acc = [0.2, 0.8, 0] 
+    shape_cost = [0, 1, 0]     
+    shape_dec = [0, 0.8, 0.2]
+    shapes = [x for x in [shape_acc] + [shape_cost] * (2*n_step-1) + [shape_dec]]
+
+    R = h/(2*n_step)
+
+    p_len = TrPath.get_milling_path_perimeter(n_step=n_step, heigth=h, width=w)
+
+    for i, (Ds, shape) in enumerate(zip(p_len, shapes)):       
+        Dt = Ds/(v_max*(shape[0]/2 + shape[1] + shape[2]/2))
+
+        # applico la LDM trapezoidale distinguendo tratti dritti e curvi
+        ti, si, vi, ai = MP.trapezoidal_MP(Ds=Ds, Dt=Dt, ti=t0, s0=s0, n_points=n_points, shape=shape)
+        
+        if i % 2 == 1:
+            kin_param = ti, si, vi, ai
+            ti, si, vi, ai, ait, aic = MP.arc_motion(kin_param, radius=R, start_angle=0)
+
+        s0 = si[-1]
+        t0 = ti[-1]
+
+        t = np.concatenate([t, ti])
+        s = np.concatenate([s, si])
+        v = np.concatenate([v, vi])
+        a = np.concatenate([a, ai])
+    
+    # traccio la legge di moto complessiva
+    um1 = ["[s]", "[m]", "$[\\frac{m}{s}]$", "$[\\frac{m}{s^{2}}]$"]
+    title = ["          Moto rettilineo", "Spazio percorso", "Velocità percorso", "Accelerazione totale"]
+    PlotMP.plot_motion_profile(title=title, t=t, s=s, v=v, a=a, um=um1)
+    
 
 # =======================================================================================================================
 
-def traccia_poligono():
+def poligonon_loop():
     um1 = ("Tempo", "Spazio", "Velocità", "Accelerazione")
-    LDM = MotionProfile()
-    PlotLDM = PlotMotionProfile(um_axes=um1)
-    TracciaPercorso = TracePath()
+    MP = MotionProfile()
+    PlotMP = PlotMotionProfile(um_axes=um1)
+    TrPath = TracePath()
 
     n_punti = 1000
 
-    pos_x, pos_y = TracciaPercorso.trace_regular_rounded_polygon(center=(0,0), n_sides=6, fillet_radius=0.4, radius=1, polygon_angle=0, n_points=n_punti)
+    pos_x, pos_y = TrPath.trace_regular_rounded_polygon(center=(0,0), n_sides=6, fillet_radius=0.4, radius=1, polygon_angle=0, n_points=n_punti)
     um2 = ("[m]", "[m]")
-    PlotLDM.plot_path(x=pos_x, y=pos_y, um=um2)
+    PlotMP.plot_path(x=pos_x, y=pos_y, um=um2)
 
     
 
@@ -255,16 +283,16 @@ def traccia_poligono():
 
 
 if __name__ == "__main__":
-    scelta = 2
+    menu = 3
     
-    if scelta == 0:
+    if menu == 0:
         straight_line()
-    elif scelta == 1:
+    elif menu == 1:
         circle_arc()
-    elif scelta == 2:
+    elif menu == 2:
         closed_loop()
-    elif scelta == 3:
-        traccia_percorso_utensile()
-    elif scelta == 4:
-        traccia_poligono()
+    elif menu == 3:
+        tool_path()
+    elif menu == 4:
+        poligonon_loop()
 
