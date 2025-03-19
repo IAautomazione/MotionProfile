@@ -311,7 +311,7 @@ class TracePath():
 
         h = R*np.sqrt(1-(sin(pi/N))**2)       # distance from circle's center and poligon center side
         self.l_polygon = 2*np.sqrt(R**2-h**2) # lenght of poligon side
-        hp = h - r                            # vertical ddistance from the polygon center to the fillet_radius center
+        hp = h - r                            # vertical distance from the polygon center to the fillet_radius center
         Lp = hp*np.tan(beta/2)                # half side of the polygon
         s = hp/cos(beta/2)                    # distance from the polygon center to the fillet_radius center
 

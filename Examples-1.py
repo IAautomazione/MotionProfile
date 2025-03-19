@@ -1,8 +1,8 @@
 """
-Author: Archetti Ivan
+Autoer: Archetti Ivan
 Date: 10/01/2025
 
-Example of motion profile (Trapezoidal velocity profile)
+Esempi di studio profili di moto (Trapezoidal velocity profile)
 """
 
 
@@ -62,9 +62,6 @@ def straight_line():
     um_y = ("[s]", "[m]", "$[\\frac{m}{s}]$", "$[\\frac{m}{s^{2}}]$")
     title_y = ["          Moto in y", "Spazio in y", "Velocità in y", "Accelerazione in y"] 
     PlotMP.plot_motion_profile(title=title_y, t=t, s=sy, v=vy, a=ay, amax=(0,0), vmax=(0,0), um=um_y)
-
-    
-
 
 # =======================================================================================================================
 
@@ -129,8 +126,6 @@ def circle_arc():
     um_y = ("[s]", "[m]", "$[\\frac{m}{s}]$", "$[\\frac{m}{s^{2}}]$")
     title_y = ["          Moto in y", "Spazio in y", "Velocità in y", "Accelerazione in y"] 
     PlotMP.plot_motion_profile(title=title_y, t=t, s=sy, v=vy, a=ay, amax=(0,0), vmax=(0,0), um=um_y)
-
-    
 
 
 # =======================================================================================================================
@@ -270,20 +265,75 @@ def poligonon_loop():
     PlotMP = PlotMotionProfile(um_axes=um1)
     TrPath = TracePath()
 
-    n_punti = 1000
+    n_points = 1000
+    N = 6
+    r = 0.4
+    R = 1
+    p_angle = 0
 
-    pos_x, pos_y = TrPath.trace_regular_rounded_polygon(center=(0,0), n_sides=6, fillet_radius=0.4, radius=1, polygon_angle=0, n_points=n_punti)
+    pos_x, pos_y = TrPath.trace_regular_rounded_polygon(center=(0,0), n_sides=N, fillet_radius=r, radius=R, polygon_angle=p_angle, n_points=n_points)
     um2 = ("[m]", "[m]")
     PlotMP.plot_path(x=pos_x, y=pos_y, um=um2)
 
+    # calcolo le geometrie di supporto
+    beta = 2*pi/N                         # angolo interno raccordo
+    l_arco = beta*r                       # arco di raccordo radrizzato
+
+    h = R*np.sqrt(1-(np.sin(pi/N))**2)    # distanza tra il centro del poligono e il centro del lato
+    hp = h - r                            # distanza tra il centro del poligono e il centro del lato meno il raggio di raccordo
+    Lp = 2*hp*np.tan(beta/2)              # lunghezza lato poligono senza raccordo
+
+    # creo la cinematica
+    t = np.array([])
+    s = np.array([])
+    v = np.array([])
+    a = np.array([])
+
+    t0 = 0
+    s0 = 0
+
+    v_max = 1
+
+    shape_acc = [0.2, 0.8, 0] 
+    shape_cost = [0, 1, 0]     
+    shape_dec = [0, 0.8, 0.2]
+    shapes = [x for x in [shape_acc] + [shape_cost] * 2*(N-1) + [shape_dec]]
+
+    for i, shape in enumerate(shapes):       
+        if i % 2 == 0:
+            Ds = Lp
+        else:
+            Ds = l_arco
+
+        Dt = Ds/(v_max*(shape[0]/2 + shape[1] + shape[2]/2))
+
+        # applico la LDM trapezoidale distinguendo tratti dritti e curvi
+        ti, si, vi, ai = MP.trapezoidal_MP(Ds=Ds, Dt=Dt, ti=t0, s0=s0, n_points=n_points, shape=shape)
+        
+        if i % 2 == 1:
+            kin_param = ti, si, vi, ai
+            ti, si, vi, ai, ait, aic = MP.arc_motion(kin_param, radius=R, start_angle=0)
+
+        s0 = si[-1]
+        t0 = ti[-1]
+
+        t = np.concatenate([t, ti])
+        s = np.concatenate([s, si])
+        v = np.concatenate([v, vi])
+        a = np.concatenate([a, ai])
     
+    # traccio la legge di moto complessiva
+    um1 = ["[s]", "[m]", "$[\\frac{m}{s}]$", "$[\\frac{m}{s^{2}}]$"]
+    title = ["          Moto rettilineo", "Spazio percorso", "Velocità percorso", "Accelerazione totale"]
+    PlotMP.plot_motion_profile(title=title, t=t, s=s, v=v, a=a, um=um1)
 
 # =======================================================================================================================
 
 
 
 if __name__ == "__main__":
-    menu = 3
+    # seleziona il umero per visualizzare gli esempi
+    menu = 0
     
     if menu == 0:
         straight_line()
