@@ -332,7 +332,7 @@ def poligonon_loop():
 
 
 if __name__ == "__main__":
-    # seleziona il umero per visualizzare gli esempi
+    # seleziona il numero per visualizzare gli esempi
     menu = 0
     
     if menu == 0:
